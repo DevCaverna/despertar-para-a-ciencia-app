@@ -1,17 +1,22 @@
-import { api } from '@/services/api.service';
+import type { AxiosInstance, AxiosResponse } from 'axios';
+
 import type { CreateProfileDto, SendVerificationCodeDto } from '@/dtos/profile.dto';
 import type { UserProfile } from '@/models/user.model';
 
-export const userService = {
-  async getProfile(): Promise<UserProfile> {
-    const { data } = await api.get<UserProfile>('/users/profile');
-    return data;
-  },
-  async createProfile(payload: CreateProfileDto): Promise<UserProfile> {
-    const { data } = await api.post<UserProfile>('/users/profile', payload);
-    return data;
-  },
-  async sendVerificationCode(payload: SendVerificationCodeDto): Promise<void> {
-    await api.post('/users/send-email-verification-code', payload, { skipAuth: true });
-  },
-};
+export class UserService {
+  private readonly baseUrl = '/users';
+
+  constructor(private readonly api: AxiosInstance) {}
+
+  getProfile(): Promise<AxiosResponse<UserProfile>> {
+    return this.api.get<UserProfile>(`${this.baseUrl}/profile`);
+  }
+
+  createProfile(payload: CreateProfileDto): Promise<AxiosResponse<UserProfile>> {
+    return this.api.post<UserProfile>(`${this.baseUrl}/profile`, payload);
+  }
+
+  sendVerificationCode(payload: SendVerificationCodeDto): Promise<AxiosResponse<void>> {
+    return this.api.post<void>(`${this.baseUrl}/send-email-verification-code`, payload);
+  }
+}

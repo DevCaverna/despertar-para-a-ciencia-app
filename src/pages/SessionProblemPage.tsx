@@ -1,27 +1,59 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+
 import { RouteStatus } from '@/components/RouteStatus';
 import { useSession } from '@/contexts/SessionContext';
-import { getErrorMessage } from '@/utils/auth-error';
+import { extractAxiosErrorMessage } from '@/utils/extract-axios-error-message.util';
 
 export function SessionProblemPage() {
+  const { t } = useTranslation();
   const { user, profileStatus, profileError, loadProfile, logout } = useSession();
   const [busy, setBusy] = useState(false);
 
   if (profileStatus === 'inactive') {
-    return <RouteStatus title="Perfil inativo" message="A conta de autenticação existe, mas o perfil local está inativo. Entre em contato com a equipe responsável para recuperar o acesso." action={<button className="button button--secondary" onClick={() => void logout()}>Sair da conta</button>} />;
+    return (
+      <RouteStatus
+        title={t('inactiveProfile')}
+        message={t('inactiveSessionMessage')}
+        action={
+          <button className="button button--secondary" onClick={() => void logout()}>
+            {t('signOutAccount')}
+          </button>
+        }
+      />
+    );
   }
 
   async function retry() {
     setBusy(true);
-    try { await loadProfile(); } finally { setBusy(false); }
+    try {
+      await loadProfile();
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
     <RouteStatus
-      title="Não foi possível validar sua sessão"
-      message={getErrorMessage(profileError)}
-      action={user ? <div style={{ display: 'flex', gap: '.75rem' }}><button className="button button--primary" disabled={busy} onClick={() => void retry()}>{busy ? 'Verificando…' : 'Tentar novamente'}</button><button className="button button--secondary" onClick={() => void logout()}>Sair e entrar novamente</button></div> : <Link className="button button--primary" to="/login">Entrar</Link>}
+      title={t('inactiveSessionTitle')}
+      message={extractAxiosErrorMessage(profileError)}
+      action={
+        user ? (
+          <div style={{ display: 'flex', gap: '.75rem' }}>
+            <button className="button button--primary" disabled={busy} onClick={() => void retry()}>
+              {busy ? t('checking') : t('tryAgain')}
+            </button>
+            <button className="button button--secondary" onClick={() => void logout()}>
+              {t('signOutAndIn')}
+            </button>
+          </div>
+        ) : (
+          <Link className="button button--primary" to="/login">
+            {t('login')}
+          </Link>
+        )
+      }
     />
   );
 }

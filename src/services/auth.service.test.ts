@@ -7,9 +7,9 @@ const { createProfile, getIdToken, requireAuth } = vi.hoisted(() => ({
 }));
 
 vi.mock('@/services/firebase.service', () => ({ requireAuth }));
-vi.mock('@/services/user.service', () => ({ userService: { createProfile } }));
-
 import { completeProfile } from '@/services/auth.service';
+
+const userService = { createProfile } as never;
 
 describe('conclusão do perfil', () => {
   beforeEach(() => {
@@ -19,13 +19,25 @@ describe('conclusão do perfil', () => {
   });
 
   it('cria o perfil e renova as claims do Firebase após a resposta da API', async () => {
-    await expect(completeProfile({ name: 'Ada Lovelace', email: 'ada@example.com', code: '123456' })).resolves.toEqual({ id: 'profile-uuid' });
-    expect(createProfile).toHaveBeenCalledWith({ name: 'Ada Lovelace', email: 'ada@example.com', code: '123456' });
+    createProfile.mockResolvedValue({ data: { id: 'profile-uuid' } });
+    await expect(
+      completeProfile(
+        { name: 'Ada Lovelace', email: 'ada@example.com', code: '123456' },
+        userService,
+      ),
+    ).resolves.toEqual({ id: 'profile-uuid' });
+    expect(createProfile).toHaveBeenCalledWith({
+      name: 'Ada Lovelace',
+      email: 'ada@example.com',
+      code: '123456',
+    });
     expect(getIdToken).toHaveBeenCalledWith(true);
   });
 
   it('não envia código para a API quando o e-mail não corresponde à conta Firebase', async () => {
-    await expect(completeProfile({ name: 'Ada', email: 'wrong@example.com', code: '123456' })).rejects.toThrow('corresponder à conta autenticada');
+    await expect(
+      completeProfile({ name: 'Ada', email: 'wrong@example.com', code: '123456' }, userService),
+    ).rejects.toThrow('authEmailMismatch');
     expect(createProfile).not.toHaveBeenCalled();
   });
 });

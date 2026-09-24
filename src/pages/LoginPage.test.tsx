@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { LoginPage } from '@/pages/LoginPage';
 import { loginWithPassword } from '@/services/auth.service';
 
@@ -22,13 +23,21 @@ describe('tela de login', () => {
     fireEvent.change(screen.getByLabelText('E-mail'), { target: { value: 'ada@example.com' } });
     fireEvent.change(screen.getByLabelText('Senha'), { target: { value: 'password' } });
     fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
-    await waitFor(() => expect(loginWithPassword).toHaveBeenCalledWith('ada@example.com', 'password'));
+    await waitFor(() =>
+      expect(loginWithPassword).toHaveBeenCalledWith('ada@example.com', 'password'),
+    );
     expect(await screen.findByText('Início autenticado')).toBeInTheDocument();
   });
 
   it('apresenta erros recuperáveis de credenciais sem expor erro técnico', async () => {
-    vi.mocked(loginWithPassword).mockRejectedValue(Object.assign(new Error('technical details'), { code: 'auth/invalid-credential' }));
-    render(<MemoryRouter><LoginPage /></MemoryRouter>);
+    vi.mocked(loginWithPassword).mockRejectedValue(
+      Object.assign(new Error('technical details'), { code: 'auth/invalid-credential' }),
+    );
+    render(
+      <MemoryRouter>
+        <LoginPage />
+      </MemoryRouter>,
+    );
     fireEvent.change(screen.getByLabelText('E-mail'), { target: { value: 'ada@example.com' } });
     fireEvent.change(screen.getByLabelText('Senha'), { target: { value: 'password' } });
     fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));

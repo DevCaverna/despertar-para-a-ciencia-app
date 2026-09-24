@@ -1,8 +1,19 @@
 import { onAuthStateChanged, signOut, type User as FirebaseUser } from 'firebase/auth';
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { userService } from '@/services/user.service';
-import { auth, firebaseConfigurationAvailable } from '@/services/firebase.service';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
+
+import { useApi } from '@/hooks/useApi';
 import type { UserProfile } from '@/models/user.model';
+import { auth, firebaseConfigurationAvailable } from '@/services/firebase.service';
+import { UserService } from '@/services/user.service';
 
 export type ProfileStatus = 'loading' | 'ready' | 'not-found' | 'inactive' | 'error' | 'none';
 export type SessionStatus = 'initializing' | 'authenticated' | 'unauthenticated';
@@ -20,8 +31,12 @@ interface SessionContextValue {
 const SessionContext = createContext<SessionContextValue | null>(null);
 
 export function SessionProvider({ children }: { children: ReactNode }) {
+  const api = useApi();
+  const userService = useMemo(() => new UserService(api), [api]);
   const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [status, setStatus] = useState<SessionStatus>(firebaseConfigurationAvailable ? 'initializing' : 'unauthenticated');
+  const [status, setStatus] = useState<SessionStatus>(
+    firebaseConfigurationAvailable ? 'initializing' : 'unauthenticated',
+  );
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [profileStatus, setProfileStatus] = useState<ProfileStatus>('none');
   const [profileError, setProfileError] = useState<unknown>(null);
@@ -33,7 +48,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setProfileStatus('loading');
     setProfileError(null);
     try {
-      const current = await userService.getProfile();
+      const { data: current } = await userService.getProfile();
       if (requestId !== profileRequestId.current || uid !== auth?.currentUser?.uid) return null;
       setProfile(current);
       setProfileStatus(current.active ? 'ready' : 'inactive');
@@ -42,12 +57,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       if (requestId !== profileRequestId.current || uid !== auth?.currentUser?.uid) return null;
       setProfile(null);
       setProfileError(error);
-      if ((error as { response?: { status?: number } }).response?.status === 404) setProfileStatus('not-found');
-      else if ((error as { response?: { status?: number } }).response?.status === 403) setProfileStatus('inactive');
+      if ((error as { response?: { status?: number } }).response?.status === 404)
+        setProfileStatus('not-found');
+      else if ((error as { response?: { status?: number } }).response?.status === 403)
+        setProfileStatus('inactive');
       else setProfileStatus('error');
       return null;
     }
-  }, []);
+  }, [userService]);
 
   useEffect(() => {
     if (!firebaseConfigurationAvailable || !auth) {
@@ -78,7 +95,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setStatus('unauthenticated');
   }, []);
 
-  const value = useMemo(() => ({ user, profile, status, profileStatus, profileError, loadProfile, logout }), [user, profile, status, profileStatus, profileError, loadProfile, logout]);
+  const value = useMemo(
+    () => ({ user, profile, status, profileStatus, profileError, loadProfile, logout }),
+    [user, profile, status, profileStatus, profileError, loadProfile, logout],
+  );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }

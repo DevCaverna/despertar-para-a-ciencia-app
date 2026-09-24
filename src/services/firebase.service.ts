@@ -26,7 +26,7 @@ export const auth = authInstance;
 
 export function requireAuth(): Auth {
   if (!auth) {
-    throw new Error('A autenticação ainda não foi configurada. Confira as variáveis VITE_FIREBASE_* no .env.local.');
+    throw new Error('firebaseNotConfigured');
   }
   return auth;
 }

@@ -1,17 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
-import { I18nextProvider } from 'react-i18next';
+
 import App from '@/App';
-import { i18n } from '@/locales';
+import { SessionProvider } from '@/contexts/SessionContext';
+import { ApiProvider } from '@/hooks/useApi';
+import '@/locales';
+
 import '@/index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <I18nextProvider i18n={i18n}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </I18nextProvider>
+    <ApiProvider>
+      <SessionProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </SessionProvider>
+    </ApiProvider>
   </React.StrictMode>,
 );
