@@ -1,0 +1,11 @@
+.env
+.env.*.local
+node_modules
+dist
+dist-ssr
+*.local
+.agents/*
+!.agents/README.md
+!.agents/artifacts/
+.agents/artifacts/*
+!.agents/artifacts/.gitkeep
