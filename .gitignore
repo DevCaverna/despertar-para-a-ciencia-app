@@ -6,6 +6,9 @@ dist-ssr
 *.local
 .agents/*
 !.agents/README.md
+!.agents/memory/
+!.agents/prompts/
 !.agents/artifacts/
+!.agents/skills/
 .agents/artifacts/*
 !.agents/artifacts/.gitkeep
