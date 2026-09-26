@@ -9,7 +9,7 @@ export function ThemeToggle() {
 
   return (
     <button
-      className="theme-toggle"
+      className="inline-flex size-9 items-center justify-center rounded-lg border border-line bg-surface text-ink-secondary transition-colors hover:border-brand hover:bg-canvas-alt hover:text-brand"
       type="button"
       onClick={toggleTheme}
       aria-label={label}
@@ -17,6 +17,7 @@ export function ThemeToggle() {
     >
       {theme === 'light' ? (
         <svg
+          className="size-5"
           aria-hidden="true"
           viewBox="0 0 24 24"
           fill="none"
@@ -29,6 +30,7 @@ export function ThemeToggle() {
         </svg>
       ) : (
         <svg
+          className="size-5"
           aria-hidden="true"
           viewBox="0 0 24 24"
           fill="none"

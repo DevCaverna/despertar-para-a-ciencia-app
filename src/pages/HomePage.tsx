@@ -31,11 +31,18 @@ export function HomePage() {
   }
 
   return (
-    <div className="site-frame">
-      <section className="home-intro" aria-labelledby="home-heading">
-        <p className="eyebrow">{t('homeEyebrow')}</p>
-        <h1 id="home-heading">{t('homeTitle')}</h1>
-        <p className="home-intro__lead">
+    <div className="mx-auto w-[calc(100%_-_3rem)] max-w-[1400px] max-[720px]:w-[calc(100%_-_2rem)]">
+      <section className="max-w-[54rem] py-[clamp(4rem,12vw,8rem)]" aria-labelledby="home-heading">
+        <p className="mb-3 text-xs font-bold tracking-[0.12em] text-brand uppercase">
+          {t('homeEyebrow')}
+        </p>
+        <h1
+          id="home-heading"
+          className="mb-4 max-w-[13ch] font-editorial text-[clamp(2.7rem,8vw,5.4rem)]"
+        >
+          {t('homeTitle')}
+        </h1>
+        <p className="max-w-[39rem] text-lg text-ink-secondary">
           {t('homeGreeting', { name: profile?.name ?? user.displayName ?? t('scientist') })}
         </p>
       </section>
