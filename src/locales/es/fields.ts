@@ -1,4 +1,6 @@
 export const fields = {
+  switchToDark: 'Activar el modo oscuro',
+  switchToLight: 'Activar el modo claro',
   language: 'Idioma',
   email: 'Correo electrónico',
   password: 'Contraseña',

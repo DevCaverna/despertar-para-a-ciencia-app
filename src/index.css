@@ -2,6 +2,7 @@
 @import 'tailwindcss';
 
 :root {
+  color-scheme: light;
   font-family:
     Inter,
     -apple-system,
@@ -30,6 +31,23 @@
   --shadow-card: 0 8px 30px rgb(44 36 32 / 8%);
 }
 
+html.dark {
+  color-scheme: dark;
+  --color-bg: #1a1614;
+  --color-bg-alt: #231f1c;
+  --color-card: #2a2522;
+  --color-border: #3d3632;
+  --color-border-light: #332e2a;
+  --color-text: #ede8e3;
+  --color-secondary: #b5a99e;
+  --color-muted: #94877d;
+  --color-accent: #e0654e;
+  --color-accent-hover: #f07a64;
+  --color-danger: #f0786b;
+  --color-success: #73c591;
+  --shadow-card: 0 8px 30px rgb(0 0 0 / 30%);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -44,6 +62,9 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   line-height: 1.6;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 button,
 input {
@@ -88,6 +109,9 @@ p {
   background: rgb(250 248 245 / 94%);
   backdrop-filter: blur(12px);
 }
+html.dark .site-header {
+  background: rgb(26 22 20 / 94%);
+}
 .site-header__inner {
   display: flex;
   min-height: 4rem;
@@ -115,6 +139,41 @@ p {
   display: flex;
   align-items: center;
   gap: 1.25rem;
+}
+.language-select {
+  min-height: 2.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  padding: 0.25rem 1.7rem 0.25rem 0.55rem;
+  background: var(--color-card);
+  color: var(--color-secondary);
+  font: inherit;
+  font-size: 0.8rem;
+}
+.theme-toggle {
+  display: inline-flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  background: var(--color-card);
+  color: var(--color-secondary);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+.theme-toggle:hover {
+  border-color: var(--color-accent);
+  background: var(--color-bg-alt);
+  color: var(--color-accent);
+}
+.theme-toggle svg {
+  width: 1.2rem;
+  height: 1.2rem;
 }
 .site-nav a {
   color: var(--color-secondary);
@@ -259,6 +318,9 @@ p {
   color: #992f24;
   font-size: 0.9rem;
 }
+html.dark .form-error {
+  color: #ffaaa0;
+}
 .form-success {
   border: 1px solid rgb(58 143 92 / 25%);
   border-radius: 8px;
@@ -266,6 +328,9 @@ p {
   background: rgb(58 143 92 / 8%);
   color: #286b43;
   font-size: 0.9rem;
+}
+html.dark .form-success {
+  color: #a3e1b8;
 }
 .form-card .button--primary {
   width: 100%;

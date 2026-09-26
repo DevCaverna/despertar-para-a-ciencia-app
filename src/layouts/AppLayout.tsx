@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useSession } from '@/contexts/SessionContext';
 import { i18n } from '@/locales';
 
@@ -40,8 +41,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
             {user && <Link to="/">{t('home')}</Link>}
           </nav>
           <div className="site-actions">
+            <ThemeToggle />
             <select
               id="language-select"
+              className="language-select"
               aria-label={t('language')}
               value={i18n.resolvedLanguage ?? 'pt-BR'}
               onChange={(event) => void i18n.changeLanguage(event.target.value)}

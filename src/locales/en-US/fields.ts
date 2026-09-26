@@ -1,4 +1,6 @@
 export const fields = {
+  switchToDark: 'Switch to dark mode',
+  switchToLight: 'Switch to light mode',
   language: 'Language',
   email: 'Email',
   password: 'Password',
