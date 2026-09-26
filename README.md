@@ -51,4 +51,6 @@ Os endpoints e corpos seguem a documentação atual da API (`POST /users/send-em
 - `src/components`, `contexts`, `layouts`, `pages`: estrutura de interface e sessão.
 - `src/services`: Firebase, cliente Axios único e serviço de perfil.
 - `src/models`, `dtos`, `schemas`, `utils`, `locales`: tipos e responsabilidades compartilhadas.
-- `.agents/artifacts/`: planos e arquivos temporários não versionados.
+- `AGENTS.md`: instruções do projeto e roteamento para ai-memory.
+- `.agents/memory/`, `.agents/prompts/`, `.agents/skills/`: conhecimento, prompts e skills reutilizáveis versionados.
+- `.agents/artifacts/`: planos e arquivos temporários ignorados pelo Git.

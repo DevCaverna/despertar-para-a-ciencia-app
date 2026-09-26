@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useSession } from '@/contexts/SessionContext';
 import { i18n } from '@/locales';
 
@@ -28,20 +29,35 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <header className="site-header">
-        <div className="site-frame site-header__inner">
-          <Link to="/" className="brand">
-            <span className="brand__mark" aria-hidden="true">
+      <header className="sticky top-0 z-10 border-b border-line bg-canvas/95 backdrop-blur-xl">
+        <div className="mx-auto flex min-h-16 w-[calc(100%_-_3rem)] max-w-[1400px] items-center gap-4 max-[720px]:min-h-[3.75rem] max-[720px]:w-[calc(100%_-_2rem)] max-[720px]:flex-wrap max-[720px]:gap-x-3 max-[720px]:gap-y-1 max-[720px]:py-1">
+          <Link
+            to="/"
+            className="mr-auto whitespace-nowrap font-editorial text-lg font-bold text-ink no-underline hover:text-ink hover:no-underline max-[720px]:text-base"
+          >
+            <span className="mr-2 text-brand" aria-hidden="true">
               ✳
             </span>
             {t('appName')}
           </Link>
-          <nav className="site-nav" aria-label={t('mainNavigation')}>
-            {user && <Link to="/">{t('home')}</Link>}
+          <nav
+            className="flex items-center gap-5 max-[720px]:order-3 max-[720px]:w-full max-[720px]:gap-4 max-[720px]:pb-1"
+            aria-label={t('mainNavigation')}
+          >
+            {user && (
+              <Link
+                className="text-sm text-ink-secondary hover:text-ink hover:no-underline max-[720px]:text-xs"
+                to="/"
+              >
+                {t('home')}
+              </Link>
+            )}
           </nav>
-          <div className="site-actions">
+          <div className="flex items-center gap-5 max-[720px]:gap-1">
+            <ThemeToggle />
             <select
               id="language-select"
+              className="min-h-9 rounded-lg border border-line bg-surface px-2 py-1 text-xs text-ink-secondary"
               aria-label={t('language')}
               value={i18n.resolvedLanguage ?? 'pt-BR'}
               onChange={(event) => void i18n.changeLanguage(event.target.value)}
@@ -52,11 +68,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </select>
             {user ? (
               <>
-                <span className="user-name" title={profile?.name ?? user.email ?? undefined}>
+                <span
+                  className="max-w-56 truncate text-sm text-ink-secondary max-[720px]:max-w-32 max-[720px]:text-xs"
+                  title={profile?.name ?? user.email ?? undefined}
+                >
                   {profile?.name ?? user.displayName ?? user.email}
                 </span>
                 <button
-                  className="button button--text"
+                  className="inline-flex min-h-10 items-center justify-center rounded-lg px-2.5 py-1.5 text-sm font-semibold text-ink-secondary transition-colors hover:bg-canvas-alt hover:text-ink disabled:cursor-not-allowed disabled:opacity-60 max-[720px]:min-h-9 max-[720px]:px-2 max-[720px]:text-xs"
                   type="button"
                   onClick={handleLogout}
                   disabled={loggingOut}
@@ -82,9 +101,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <main className="page-main">{children}</main>
-      <footer className="site-footer">
-        <div className="site-frame">{t('appName')}</div>
+      <main className="min-h-[calc(100vh-8rem)]">{children}</main>
+      <footer className="border-t border-line py-5 text-[0.8125rem] text-ink-muted">
+        <div className="mx-auto w-[calc(100%_-_3rem)] max-w-[1400px] max-[720px]:w-[calc(100%_-_2rem)]">
+          {t('appName')}
+        </div>
       </footer>
     </>
   );
