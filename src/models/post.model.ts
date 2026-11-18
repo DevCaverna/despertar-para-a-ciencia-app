@@ -16,3 +16,7 @@ export interface PublishedPostPage {
   perPage: number;
   hasNextPage: boolean;
 }
+
+export interface PublishedPostDetail extends PublishedPost {
+  content: string;
+}
