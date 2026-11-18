@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useSearchParams } from 'react-router';
+import { Link, useLocation, useSearchParams } from 'react-router';
 
 import { PostCard } from '@/components/posts/PostCard';
 import { useApi } from '@/hooks/useApi';
@@ -181,6 +181,7 @@ function FeedResults({ page, params }: { page: number; params: URLSearchParams }
 }
 
 function PostList({ items, locale }: { items: PublishedPost[]; locale?: string }) {
+  const { search } = useLocation();
   const dateFormat = new Intl.DateTimeFormat(locale, { dateStyle: 'long' });
   const monthFormat = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' });
   const groups: { month: string; posts: PublishedPost[] }[] = [];
@@ -202,7 +203,7 @@ function PostList({ items, locale }: { items: PublishedPost[]; locale?: string }
           <ul className="grid gap-3" role="list">
             {posts.map((post) => (
               <li key={post.id}>
-                <PostCard post={post} dateFormat={dateFormat} />
+                <PostCard post={post} dateFormat={dateFormat} feedSearch={search} />
               </li>
             ))}
           </ul>

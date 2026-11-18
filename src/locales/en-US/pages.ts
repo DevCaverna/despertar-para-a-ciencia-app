@@ -28,6 +28,13 @@ export const pages = {
   feedNext: 'Next',
   feedPage: 'Page {{page}}',
   feedPageLoaded: 'Publications loaded. {{page}}.',
+  postPageTitle: 'Publication',
+  postLoading: 'Loading publication…',
+  postBackToFeed: 'Back to publications',
+  postUnavailableTitle: 'Publication not found',
+  postUnavailableMessage: 'This content is unavailable or may have been removed.',
+  postErrorTitle: 'Could not load the publication',
+  postErrorMessage: 'Check your connection and try again.',
   inactiveSessionTitle: 'Could not validate your session',
   inactiveSessionMessage:
     'Your authentication account exists, but the local profile is inactive. Contact the support team to restore access.',
