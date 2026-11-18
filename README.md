@@ -4,8 +4,8 @@ Frontend independente em React, TypeScript e Vite. A arquitetura inicial acompan
 
 ## Requisitos e instalação
 
-- Node.js compatível com Vite 7.
-- pnpm 10.33.2 (veja `packageManager` em `package.json`).
+- Node.js 24.
+- pnpm 12.3.4 (veja `packageManager` em `package.json`).
 
 ```sh
 pnpm install
@@ -15,9 +15,12 @@ pnpm dev
 
 Configure `.env.local` com a URL da API e os valores públicos de configuração do Firebase Web SDK antes de usar autenticação. A aplicação não aceita credenciais privadas do Firebase Admin, chaves HMAC ou segredos da API.
 
+Para ler o feed público sem login, basta configurar `VITE_API_URL`. As variáveis do Firebase podem ser omitidas.
+
 ## Validação local
 
 ```sh
+pnpm format:check
 pnpm build       # TypeScript + bundle de produção
 pnpm lint
 pnpm test
@@ -41,15 +44,16 @@ Sem `VITE_FIREBASE_AUTH_EMULATOR_URL`, o SDK utiliza o serviço Firebase configu
 - Cadastro por nome, e-mail e senha, solicitação do código temporário por API, verificação e criação/reconciliação do perfil.
 - Retomada de cadastro quando a conta Firebase já existe sem perfil local; senha, código e ID Token não são gravados em `localStorage` ou `sessionStorage`.
 - Login e restauração de sessão Firebase; carregamento do perfil local e apresentação específica para perfil ausente, inativo ou falha recuperável.
-- Renovação controlada do ID Token uma vez após `401`, logout e navegação entre início, login e cadastro.
-- Página inicial mínima sem feed ou conteúdo fictício.
+- Renovação controlada do ID Token uma vez após `401` em requisições autenticadas, logout e navegação entre feed, login e cadastro.
+- Feed público em `/`, com paginação em `/?page=2`. A consulta `GET /posts?page=1&perPage=20` não envia token e retorna `{ items, page, perPage, hasNextPage }`. Cada item contém `id`, `title`, `publishedAt` (ISO 8601) e `author` (`{ id, name }` ou `null`). A ordem da API é preservada; a leitura individual fica para a SCRUM-40.
+- Página de boas-vindas autenticada em `/dashboard`, provisória e sem autorização por papel no frontend.
 
 Os endpoints e corpos seguem a documentação atual da API (`POST /users/send-email-verification-code`, `POST/GET/PATCH /users/profile`). Claims de perfil são atualizadas pela API; após o cadastro, o Firebase ID Token é renovado antes de novas requisições autenticadas.
 
 ## Organização
 
 - `src/components`, `contexts`, `layouts`, `pages`: estrutura de interface e sessão.
-- `src/services`: Firebase, cliente Axios único e serviço de perfil.
+- `src/services`: Firebase, cliente Axios único e serviços de perfil e publicações.
 - `src/models`, `dtos`, `schemas`, `utils`, `locales`: tipos e responsabilidades compartilhadas.
 - `AGENTS.md`: instruções do projeto e roteamento para ai-memory.
 - `.agents/memory/`, `.agents/prompts/`, `.agents/skills/`: conhecimento, prompts e skills reutilizáveis versionados.

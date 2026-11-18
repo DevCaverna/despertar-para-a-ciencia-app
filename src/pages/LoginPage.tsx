@@ -7,6 +7,7 @@ import { Link, useLocation, useNavigate } from 'react-router';
 import { FormMessage } from '@/components/FormMessage';
 import { loginSchema, type LoginValues } from '@/schemas/auth.schemas';
 import { loginWithPassword } from '@/services/auth.service';
+import { getAuthDestination } from '@/utils/auth-destination';
 import { extractAxiosErrorMessage } from '@/utils/extract-axios-error-message.util';
 import { translateValidationMessage } from '@/utils/validation-message';
 
@@ -27,14 +28,7 @@ export function LoginPage() {
     setSubmitting(true);
     try {
       await loginWithPassword(values.email, values.password);
-      const from = (
-        location.state as { from?: { pathname?: string; search?: string; hash?: string } } | null
-      )?.from;
-      const destination =
-        from?.pathname?.startsWith('/') && !from.pathname.startsWith('//')
-          ? `${from.pathname}${from.search ?? ''}${from.hash ?? ''}`
-          : '/';
-      navigate(destination, { replace: true });
+      navigate(getAuthDestination(location.state), { replace: true });
     } catch (error) {
       setFormError(extractAxiosErrorMessage(error));
     } finally {
@@ -90,7 +84,10 @@ export function LoginPage() {
           </button>
         </form>
         <p className="auth-foot">
-          {t('noAccount')} <Link to="/register">{t('createAccount')}</Link>
+          {t('noAccount')}{' '}
+          <Link to="/register" state={location.state}>
+            {t('createAccount')}
+          </Link>
         </p>
       </section>
     </div>
