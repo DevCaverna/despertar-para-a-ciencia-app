@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 
 import { FormMessage } from '@/components/FormMessage';
 import { useSession } from '@/contexts/SessionContext';
@@ -16,6 +16,7 @@ import {
 import { createFirebaseAccount, completeProfile, loginWithPassword } from '@/services/auth.service';
 import { UserService } from '@/services/user.service';
 import { getRetryAfterSeconds } from '@/utils/api-error';
+import { getAuthDestination } from '@/utils/auth-destination';
 import { extractAxiosErrorMessage } from '@/utils/extract-axios-error-message.util';
 import { translateValidationMessage } from '@/utils/validation-message';
 
@@ -40,6 +41,7 @@ function NewRegistration() {
   const [busy, setBusy] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const navigate = useNavigate();
+  const { state } = useLocation();
   const { loadProfile } = useSession();
   const {
     register,
@@ -98,7 +100,7 @@ function NewRegistration() {
         userService,
       );
       await loadProfile();
-      navigate('/', { replace: true });
+      navigate(getAuthDestination(state), { replace: true });
     } catch (error) {
       setFormError(extractAxiosErrorMessage(error));
       if (error && typeof error === 'object' && 'code' in error) {
@@ -239,7 +241,10 @@ function NewRegistration() {
           </form>
         )}
         <p className="auth-foot">
-          {t('hasAccount')} <Link to="/login">{t('signIn')}</Link>
+          {t('hasAccount')}{' '}
+          <Link to="/login" state={state}>
+            {t('signIn')}
+          </Link>
         </p>
       </section>
     </div>
@@ -257,6 +262,7 @@ function ResumeRegistration() {
   const [busy, setBusy] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const navigate = useNavigate();
+  const { state } = useLocation();
   const {
     register,
     handleSubmit,
@@ -302,7 +308,7 @@ function ResumeRegistration() {
     try {
       await completeProfile({ ...details, code: values.code }, userService);
       await loadProfile();
-      navigate('/', { replace: true });
+      navigate(getAuthDestination(state), { replace: true });
     } catch (error) {
       setFormError(extractAxiosErrorMessage(error));
     } finally {

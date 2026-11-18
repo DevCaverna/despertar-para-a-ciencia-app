@@ -1,18 +1,20 @@
 import { useTranslation } from 'react-i18next';
-import { Navigate } from 'react-router';
+import { Navigate, useLocation } from 'react-router';
 
 import { LoadingState } from '@/components/LoadingState';
 import { RouteStatus } from '@/components/RouteStatus';
 import { useSession } from '@/contexts/SessionContext';
 
-export function HomePage() {
+export function DashboardPage() {
   const { t } = useTranslation();
   const { user, profile, profileStatus, loadProfile } = useSession();
+  const location = useLocation();
 
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/login" replace state={{ from: location }} />;
   if (profileStatus === 'loading' || profileStatus === 'none')
     return <LoadingState label={t('checkingProfile')} />;
-  if (profileStatus === 'not-found') return <Navigate to="/register" replace />;
+  if (profileStatus === 'not-found')
+    return <Navigate to="/register" replace state={{ from: location }} />;
   if (profileStatus === 'inactive') {
     return <RouteStatus title={t('inactiveProfile')} message={t('inactiveProfileMessage')} />;
   }

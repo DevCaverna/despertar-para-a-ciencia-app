@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router';
+import { Link, NavLink, useNavigate } from 'react-router';
 
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useSession } from '@/contexts/SessionContext';
@@ -9,7 +9,7 @@ import { i18n } from '@/locales';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
-  const { user, profile, logout } = useSession();
+  const { user, profile, status, logout } = useSession();
   const navigate = useNavigate();
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState('');
@@ -44,16 +44,23 @@ export function AppLayout({ children }: { children: ReactNode }) {
             className="flex items-center gap-5 max-[720px]:order-3 max-[720px]:w-full max-[720px]:gap-4 max-[720px]:pb-1"
             aria-label={t('mainNavigation')}
           >
+            <NavLink
+              className="inline-flex min-h-9 items-center text-sm text-ink-secondary hover:text-ink hover:no-underline aria-[current=page]:font-semibold aria-[current=page]:text-ink max-[720px]:text-xs"
+              to="/"
+              end
+            >
+              {t('feedTitle')}
+            </NavLink>
             {user && (
-              <Link
-                className="text-sm text-ink-secondary hover:text-ink hover:no-underline max-[720px]:text-xs"
-                to="/"
+              <NavLink
+                className="inline-flex min-h-9 items-center text-sm text-ink-secondary hover:text-ink hover:no-underline aria-[current=page]:font-semibold aria-[current=page]:text-ink max-[720px]:text-xs"
+                to="/dashboard"
               >
-                {t('home')}
-              </Link>
+                {t('dashboard')}
+              </NavLink>
             )}
           </nav>
-          <div className="flex items-center gap-5 max-[720px]:gap-1">
+          <div className="flex min-w-0 flex-wrap items-center gap-5 max-[720px]:gap-1">
             <ThemeToggle />
             <select
               id="language-select"
@@ -88,7 +95,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   </span>
                 )}
               </>
-            ) : (
+            ) : status === 'unauthenticated' ? (
               <>
                 <Link className="button button--text" to="/login">
                   {t('login')}
@@ -97,7 +104,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   {t('register')}
                 </Link>
               </>
-            )}
+            ) : null}
           </div>
         </div>
       </header>
