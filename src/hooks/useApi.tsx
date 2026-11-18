@@ -17,6 +17,7 @@ export function ApiProvider({ children }: { children: ReactNode }) {
   useLayoutEffect(() => {
     const requestId = api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
       config.headers['x-custom-lang'] = i18n.resolvedLanguage ?? i18n.language ?? 'pt-BR';
+      if (config.headers.get('Authorization') === false) return config;
       const currentUser = auth?.currentUser;
       if (currentUser) config.headers.Authorization = `Bearer ${await currentUser.getIdToken()}`;
       else delete config.headers.Authorization;
@@ -25,8 +26,9 @@ export function ApiProvider({ children }: { children: ReactNode }) {
     const responseId = api.interceptors.response.use(undefined, async (error: unknown) => {
       if (!axios.isAxiosError(error)) throw error;
       const config = error.config;
+      if (!config || config.headers.get('Authorization') === false) throw error;
       const currentUser = auth?.currentUser;
-      if (error.response?.status !== 401 || !config || !currentUser) throw error;
+      if (error.response?.status !== 401 || !currentUser) throw error;
 
       const retryConfig = config as InternalAxiosRequestConfig & { retry?: boolean };
       if (retryConfig.retry) throw error;
