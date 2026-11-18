@@ -15,7 +15,7 @@ pnpm dev
 
 Configure `.env.local` com a URL da API e os valores públicos de configuração do Firebase Web SDK antes de usar autenticação. A aplicação não aceita credenciais privadas do Firebase Admin, chaves HMAC ou segredos da API.
 
-Para ler o feed público sem login, basta configurar `VITE_API_URL`. As variáveis do Firebase podem ser omitidas.
+Para ler o feed e as publicações sem login, basta configurar `VITE_API_URL`. As variáveis do Firebase podem ser omitidas.
 
 ## Validação local
 
@@ -45,7 +45,8 @@ Sem `VITE_FIREBASE_AUTH_EMULATOR_URL`, o SDK utiliza o serviço Firebase configu
 - Retomada de cadastro quando a conta Firebase já existe sem perfil local; senha, código e ID Token não são gravados em `localStorage` ou `sessionStorage`.
 - Login e restauração de sessão Firebase; carregamento do perfil local e apresentação específica para perfil ausente, inativo ou falha recuperável.
 - Renovação controlada do ID Token uma vez após `401` em requisições autenticadas, logout e navegação entre feed, login e cadastro.
-- Feed público em `/`, com paginação em `/?page=2`. A consulta `GET /posts?page=1&perPage=20` não envia token e retorna `{ items, page, perPage, hasNextPage }`. Cada item contém `id`, `title`, `publishedAt` (ISO 8601) e `author` (`{ id, name }` ou `null`). A ordem da API é preservada; a leitura individual fica para a SCRUM-40.
+- Feed público em `/`, com paginação em `/?page=2`. A consulta `GET /posts?page=1&perPage=20` não envia token e retorna `{ items, page, perPage, hasNextPage }`. Cada item contém `id`, `title`, `publishedAt` (ISO 8601) e `author` (`{ id, name }` ou `null`). A ordem da API é preservada.
+- Leitura pública em `/posts/:id`. `GET /posts/:id` recebe um UUIDv7 e retorna os mesmos campos públicos do feed mais `content` (texto simples). A API não retorna posts não publicados. Os links do feed preservam a página de origem para o retorno, sem alterar a URL da publicação.
 - Página de boas-vindas autenticada em `/dashboard`, provisória e sem autorização por papel no frontend.
 
 Os endpoints e corpos seguem a documentação atual da API (`POST /users/send-email-verification-code`, `POST/GET/PATCH /users/profile`). Claims de perfil são atualizadas pela API; após o cadastro, o Firebase ID Token é renovado antes de novas requisições autenticadas.

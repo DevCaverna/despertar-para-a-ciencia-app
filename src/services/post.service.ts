@@ -1,6 +1,6 @@
 import type { AxiosInstance, AxiosResponse } from 'axios';
 
-import type { PublishedPostPage } from '@/models/post.model';
+import type { PublishedPostDetail, PublishedPostPage } from '@/models/post.model';
 
 export class PostService {
   constructor(private readonly api: AxiosInstance) {}
@@ -14,6 +14,13 @@ export class PostService {
       params: { page, perPage },
       signal,
       // Axios omits headers with a false value when sending the request.
+      headers: { Authorization: false },
+    });
+  }
+
+  getPublished(id: string, signal?: AbortSignal): Promise<AxiosResponse<PublishedPostDetail>> {
+    return this.api.get<PublishedPostDetail>(`/posts/${encodeURIComponent(id)}`, {
+      signal,
       headers: { Authorization: false },
     });
   }

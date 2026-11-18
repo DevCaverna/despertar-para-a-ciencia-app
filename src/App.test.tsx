@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { AxiosResponse } from 'axios';
 import type { UserCredential } from 'firebase/auth';
 import { MemoryRouter, useLocation } from 'react-router';
@@ -7,7 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } fr
 import App from '@/App';
 import { useSession } from '@/contexts/SessionContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
-import type { PublishedPostPage } from '@/models/post.model';
+import type { PublishedPostDetail, PublishedPostPage } from '@/models/post.model';
 import { completeProfile, createFirebaseAccount, loginWithPassword } from '@/services/auth.service';
 import { PostService } from '@/services/post.service';
 import { UserService } from '@/services/user.service';
@@ -33,6 +34,13 @@ const user = {
   displayName: 'Maria Silva',
   email: 'maria@example.com',
 } as NonNullable<typeof guest.user>;
+const detail: PublishedPostDetail = {
+  id: '019abcde-f000-7000-8000-000000000002',
+  title: 'Título retornado pela API',
+  author: null,
+  publishedAt: '2026-11-18T12:00:00.000Z',
+  content: 'Conteúdo completo.',
+};
 
 function CurrentURL() {
   const { pathname, search, hash } = useLocation();
@@ -57,12 +65,15 @@ describe('rotas públicas e sessão', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useSession).mockReturnValue(guest);
+    vi.spyOn(PostService.prototype, 'getPublished').mockResolvedValue({
+      data: detail,
+    } as AxiosResponse<PublishedPostDetail>);
     listPublished = vi.spyOn(PostService.prototype, 'listPublished').mockResolvedValue({
       data: {
         items: [
           {
-            id: 'post',
-            title: 'Título retornado pela API',
+            id: detail.id,
+            title: detail.title,
             author: null,
             publishedAt: '2026-11-18T12:00:00.000Z',
           },
@@ -112,6 +123,47 @@ describe('rotas públicas e sessão', () => {
     expect(screen.getByRole('link', { name: 'Publicações' })).toBeVisible();
     expect(screen.queryByRole('link', { name: 'Entrar' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Criar conta' })).not.toBeInTheDocument();
+  });
+
+  it.each(['unauthenticated', 'initializing', 'authenticated'] as const)(
+    'abre o detalhe diretamente com sessão em estado %s',
+    async (status) => {
+      vi.mocked(useSession).mockReturnValue({
+        ...guest,
+        status,
+        user: status === 'authenticated' ? user : null,
+        profileStatus: status === 'authenticated' ? 'error' : 'none',
+      });
+      renderApp(`/posts/${detail.id}`);
+      expect(await screen.findByRole('heading', { level: 1, name: detail.title })).toHaveFocus();
+      expect(screen.getByText(detail.content)).toBeVisible();
+      expect(screen.getByLabelText('URL')).toHaveTextContent(`/posts/${detail.id}`);
+      expect(screen.getAllByRole('link', { name: 'Voltar às publicações' })[0]).toHaveAttribute(
+        'href',
+        '/',
+      );
+      expect(listPublished).not.toHaveBeenCalled();
+    },
+  );
+
+  it('abre o card por teclado e retorna à página de origem do feed', async () => {
+    const titleBefore = document.title;
+    renderApp('/?origem=teste&page=3');
+    const link = await screen.findByRole('link', { name: detail.title });
+    link.focus();
+    await userEvent.keyboard('{Enter}');
+
+    expect(await screen.findByText(detail.content)).toBeVisible();
+    expect(screen.getByLabelText('URL').textContent).toBe(`/posts/${detail.id}`);
+    expect(document.title).toBe(`${detail.title} — Despertar para a Ciência`);
+    const [back] = screen.getAllByRole('link', { name: 'Voltar às publicações' });
+    expect(back).toHaveAttribute('href', '/?origem=teste&page=3');
+    await userEvent.click(back);
+
+    expect(await screen.findByRole('link', { name: detail.title })).toBeVisible();
+    expect(screen.getByLabelText('URL').textContent).toBe('/?origem=teste&page=3');
+    expect(listPublished).toHaveBeenLastCalledWith(3, 20, expect.any(AbortSignal));
+    expect(document.title).toBe(titleBefore);
   });
 
   it('protege o painel enquanto aguarda a sessão', () => {

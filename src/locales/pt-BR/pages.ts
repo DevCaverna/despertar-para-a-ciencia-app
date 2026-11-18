@@ -28,6 +28,13 @@ export const pages = {
   feedNext: 'Próxima',
   feedPage: 'Página {{page}}',
   feedPageLoaded: 'Publicações carregadas. {{page}}.',
+  postPageTitle: 'Publicação',
+  postLoading: 'Carregando publicação…',
+  postBackToFeed: 'Voltar às publicações',
+  postUnavailableTitle: 'Publicação não encontrada',
+  postUnavailableMessage: 'Este conteúdo não está disponível ou pode ter sido removido.',
+  postErrorTitle: 'Não foi possível carregar a publicação',
+  postErrorMessage: 'Verifique sua conexão e tente novamente.',
   inactiveSessionTitle: 'Não foi possível validar sua sessão',
   inactiveSessionMessage:
     'A conta de autenticação existe, mas o perfil local está inativo. Entre em contato com a equipe responsável para recuperar o acesso.',

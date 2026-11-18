@@ -1,5 +1,5 @@
-import { render } from '@testing-library/react';
-import { AxiosError, AxiosHeaders, type AxiosAdapter } from 'axios';
+import { cleanup, render } from '@testing-library/react';
+import { AxiosError, AxiosHeaders, CanceledError, type AxiosAdapter } from 'axios';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const getIdToken = vi.hoisted(() => vi.fn());
@@ -7,8 +7,16 @@ const auth = vi.hoisted(() => ({ currentUser: { getIdToken } }));
 vi.mock('@/services/firebase.service', () => ({ auth }));
 
 import { api, ApiProvider } from '@/hooks/useApi';
-import type { PublishedPostPage } from '@/models/post.model';
+import type { PublishedPostDetail, PublishedPostPage } from '@/models/post.model';
 import { PostService } from '@/services/post.service';
+
+const detail: PublishedPostDetail = {
+  id: '019abcde-f000-7000-8000-000000000002',
+  title: 'Ciência no cotidiano',
+  content: 'Introdução.\n\nConclusão.',
+  publishedAt: '2026-11-18T12:00:00.000Z',
+  author: null,
+};
 
 describe('cliente HTTP centralizado', () => {
   const originalAdapter = api.defaults.adapter;
@@ -19,6 +27,7 @@ describe('cliente HTTP centralizado', () => {
   });
 
   afterEach(() => {
+    cleanup();
     api.defaults.adapter = originalAdapter;
   });
 
@@ -58,6 +67,57 @@ describe('cliente HTTP centralizado', () => {
 
     await expect(new PostService(api).listPublished(1, 20)).rejects.toBe(error);
     expect(adapter).toHaveBeenCalledTimes(1);
+    expect(getIdToken).not.toHaveBeenCalled();
+  });
+
+  it('consulta o detalhe público pelo cliente central sem pedir ou enviar token', async () => {
+    render(<ApiProvider>{null}</ApiProvider>);
+    const { signal } = new AbortController();
+    api.defaults.adapter = async (config) => {
+      expect(config.url).toBe(`/posts/${detail.id}`);
+      expect(config.method).toBe('get');
+      expect(config.signal).toBe(signal);
+      expect(config.headers.toJSON()).not.toHaveProperty('Authorization');
+      return { data: detail, status: 200, statusText: 'OK', headers: new AxiosHeaders(), config };
+    };
+
+    const { data } = await new PostService(api).getPublished(detail.id, signal);
+    expect(data.content).toBe(detail.content);
+    expect(data).toEqual(detail);
+    expect(getIdToken).not.toHaveBeenCalled();
+  });
+
+  it.each([401, 404])('propaga %i no detalhe público sem renovar token', async (status) => {
+    render(<ApiProvider>{null}</ApiProvider>);
+    const adapter = vi.fn<AxiosAdapter>(async (config) => {
+      throw new AxiosError('failure', undefined, config, undefined, {
+        status,
+        statusText: 'Failure',
+        headers: new AxiosHeaders(),
+        config,
+        data: {},
+      });
+    });
+    api.defaults.adapter = adapter;
+
+    await expect(new PostService(api).getPublished(detail.id)).rejects.toMatchObject({
+      response: { status },
+    });
+    expect(adapter).toHaveBeenCalledOnce();
+    expect(getIdToken).not.toHaveBeenCalled();
+  });
+
+  it('não despacha a consulta de detalhe se o sinal já estiver cancelado', async () => {
+    render(<ApiProvider>{null}</ApiProvider>);
+    const adapter = vi.fn<AxiosAdapter>();
+    api.defaults.adapter = adapter;
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(
+      new PostService(api).getPublished(detail.id, controller.signal),
+    ).rejects.toBeInstanceOf(CanceledError);
+    expect(adapter).not.toHaveBeenCalled();
     expect(getIdToken).not.toHaveBeenCalled();
   });
 

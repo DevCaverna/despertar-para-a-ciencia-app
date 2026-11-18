@@ -6,6 +6,7 @@ import { LoadingState } from '@/components/LoadingState';
 import { useSession } from '@/contexts/SessionContext';
 import { AppLayout } from '@/layouts/AppLayout';
 import { FeedPage } from '@/pages/FeedPage';
+import { PostDetailPage } from '@/pages/PostDetailPage';
 import { getAuthDestination } from '@/utils/auth-destination';
 
 const DashboardPage = lazy(() =>
@@ -52,6 +53,7 @@ export default function App() {
       <Suspense fallback={<LoadingState />}>
         <Routes>
           <Route path="/" element={<FeedPage />} />
+          <Route path="/posts/:id" element={<PostDetailPage />} />
           <Route element={<WaitForSession />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/login" element={<AuthPage mode="login" />} />

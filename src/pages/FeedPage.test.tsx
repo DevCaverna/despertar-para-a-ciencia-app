@@ -55,7 +55,7 @@ describe('feed público', () => {
     await i18n.changeLanguage('pt-BR');
   });
 
-  it('renderiza cartões textuais na ordem da API, sem criar links para detalhes', async () => {
+  it('renderiza cartões com links para os detalhes na ordem da API', async () => {
     const items = [
       { ...post, id: 'older', title: 'Primeiro item da API', publishedAt: '2026-10-22T12:00:00Z' },
       { ...post, author: null },
@@ -74,7 +74,12 @@ describe('feed público', () => {
       'datetime',
       post.publishedAt,
     );
-    expect(within(cards[1]).queryByRole('link')).not.toBeInTheDocument();
+    for (const [index, item] of items.entries()) {
+      expect(within(cards[index]).getByRole('link', { name: item.title })).toHaveAttribute(
+        'href',
+        `/posts/${item.id}`,
+      );
+    }
   });
 
   it('formata datas de acordo com o idioma sem refazer a consulta', async () => {
