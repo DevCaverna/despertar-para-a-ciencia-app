@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { AxiosResponse } from 'axios';
 import type { UserCredential } from 'firebase/auth';
@@ -136,7 +136,8 @@ describe('rotas públicas e sessão', () => {
         profileStatus: status === 'authenticated' ? 'error' : 'none',
       });
       renderApp(`/posts/${detail.id}`);
-      expect(await screen.findByRole('heading', { level: 1, name: detail.title })).toHaveFocus();
+      const heading = await screen.findByRole('heading', { level: 1, name: detail.title });
+      await waitFor(() => expect(heading).toHaveFocus());
       expect(screen.getByText(detail.content)).toBeVisible();
       expect(screen.getByLabelText('URL')).toHaveTextContent(`/posts/${detail.id}`);
       expect(screen.getAllByRole('link', { name: 'Voltar às publicações' })[0]).toHaveAttribute(
