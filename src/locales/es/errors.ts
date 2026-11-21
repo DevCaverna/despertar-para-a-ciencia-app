@@ -1,4 +1,9 @@
 export const errors = {
+  errorDraftInvalid: 'Comprueba el título y el contenido del borrador.',
+  errorDraftNotFound: 'No se encontró el borrador.',
+  errorDraftConflict: 'El borrador cambió o ya no se puede editar. Vuelve a cargar la página.',
+  validationDraftTitle: 'Introduce el título de la publicación.',
+  validationDraftContent: 'Introduce el contenido de la publicación.',
   validationEmail: 'Introduce un correo electrónico válido.',
   validationPassword: 'Introduce tu contraseña.',
   validationName: 'Introduce tu nombre.',

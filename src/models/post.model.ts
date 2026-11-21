@@ -1,3 +1,15 @@
+export interface DraftPost {
+  id: string;
+  authorId: string;
+  title: string;
+  content: string;
+  status: 'DRAFT';
+  rejectionReason: string | null;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface PublicPostAuthor {
   id: string;
   name: string;

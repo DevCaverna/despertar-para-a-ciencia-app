@@ -1,4 +1,11 @@
 export const actions = {
+  createDraft: 'Create draft',
+  editDraft: 'Edit draft',
+  saveDraft: 'Save draft',
+  savingDraft: 'Saving…',
+  backToDrafts: 'Back to drafts',
+  loadingDrafts: 'Loading drafts…',
+  loadingDraft: 'Loading draft…',
   home: 'Home',
   logout: 'Sign out',
   loggingOut: 'Signing out…',

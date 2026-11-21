@@ -1,4 +1,9 @@
 export const errors = {
+  errorDraftInvalid: 'Confira o título e o conteúdo do rascunho.',
+  errorDraftNotFound: 'Rascunho não encontrado.',
+  errorDraftConflict: 'O rascunho mudou ou não pode mais ser editado. Recarregue a página.',
+  validationDraftTitle: 'Informe o título do post.',
+  validationDraftContent: 'Informe o corpo do post.',
   validationEmail: 'Informe um e-mail válido.',
   validationPassword: 'Informe sua senha.',
   validationName: 'Informe seu nome.',

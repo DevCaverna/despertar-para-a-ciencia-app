@@ -1,4 +1,6 @@
 export const fields = {
+  draftTitle: 'Título',
+  draftContent: 'Corpo do post',
   switchToDark: 'Ativar modo escuro',
   switchToLight: 'Ativar modo claro',
   language: 'Idioma',

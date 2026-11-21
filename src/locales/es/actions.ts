@@ -1,4 +1,11 @@
 export const actions = {
+  createDraft: 'Crear borrador',
+  editDraft: 'Editar borrador',
+  saveDraft: 'Guardar borrador',
+  savingDraft: 'Guardando…',
+  backToDrafts: 'Volver a borradores',
+  loadingDrafts: 'Cargando borradores…',
+  loadingDraft: 'Cargando borrador…',
   home: 'Inicio',
   logout: 'Cerrar sesión',
   loggingOut: 'Cerrando sesión…',

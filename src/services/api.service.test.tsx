@@ -31,6 +31,31 @@ describe('cliente HTTP centralizado', () => {
     api.defaults.adapter = originalAdapter;
   });
 
+  it('envia token na listagem e no detalhe privado de rascunhos', async () => {
+    render(<ApiProvider>{null}</ApiProvider>);
+    const adapter = vi.fn<AxiosAdapter>(async (config) => ({
+      data: [],
+      status: 200,
+      statusText: 'OK',
+      headers: new AxiosHeaders(),
+      config,
+    }));
+    api.defaults.adapter = adapter;
+    const posts = new PostService(api);
+
+    await posts.listDrafts(2, 20);
+    await posts.getDraft(detail.id);
+
+    expect(adapter.mock.calls[0][0]).toMatchObject({
+      url: '/posts/drafts',
+      params: { page: 2, perPage: 20 },
+    });
+    expect(adapter.mock.calls[1][0].url).toBe(`/posts/drafts/${detail.id}`);
+    for (const [config] of adapter.mock.calls) {
+      expect(config.headers.get('Authorization')).toBe('Bearer fresh-token');
+    }
+  });
+
   it('consulta posts com paginação e cancelamento, sem pedir ou enviar token', async () => {
     render(<ApiProvider>{null}</ApiProvider>);
     const data: PublishedPostPage = { items: [], page: 2, perPage: 20, hasNextPage: false };

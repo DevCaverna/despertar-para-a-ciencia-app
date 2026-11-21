@@ -1,4 +1,15 @@
 export const pages = {
+  draftsEmptyPage: 'No hay borradores en esta página.',
+  draftsPagination: 'Paginación de borradores',
+  myDrafts: 'Mis borradores',
+  myDraftsDescription: 'Continúa escribiendo tus publicaciones.',
+  noDrafts: 'Aún no tienes borradores.',
+  draftUpdatedAt: 'Actualizado el {{date}}',
+  draftEditorDescription: 'Guarda tu trabajo y continúa escribiendo después.',
+  draftSaved: 'Borrador guardado.',
+  draftAccessDenied: 'Acceso a borradores no disponible',
+  draftAccessDeniedMessage:
+    'Solo colaboradores y administradores pueden crear y editar borradores.',
   appName: 'Despertar para la Ciencia',
   logoutError: 'No se pudo cerrar la sesión. Inténtalo de nuevo.',
   homeEyebrow: 'Conocimiento en movimiento',

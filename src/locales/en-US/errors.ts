@@ -1,4 +1,9 @@
 export const errors = {
+  errorDraftInvalid: 'Check the draft title and content.',
+  errorDraftNotFound: 'Draft not found.',
+  errorDraftConflict: 'The draft changed or can no longer be edited. Reload the page.',
+  validationDraftTitle: 'Enter a post title.',
+  validationDraftContent: 'Enter the post body.',
   validationEmail: 'Enter a valid email address.',
   validationPassword: 'Enter your password.',
   validationName: 'Enter your name.',

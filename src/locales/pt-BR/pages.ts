@@ -1,4 +1,15 @@
 export const pages = {
+  draftsEmptyPage: 'Não há rascunhos nesta página.',
+  draftsPagination: 'Paginação de rascunhos',
+  myDrafts: 'Meus rascunhos',
+  myDraftsDescription: 'Continue a escrever seus posts.',
+  noDrafts: 'Você ainda não tem rascunhos.',
+  draftUpdatedAt: 'Atualizado em {{date}}',
+  draftEditorDescription: 'Salve seu trabalho e continue a escrever depois.',
+  draftSaved: 'Rascunho salvo.',
+  draftAccessDenied: 'Acesso aos rascunhos indisponível',
+  draftAccessDeniedMessage:
+    'Somente colaboradores e administradores podem criar e editar rascunhos.',
   appName: 'Despertar para a Ciência',
   logoutError: 'Não foi possível encerrar a sessão. Tente novamente.',
   homeEyebrow: 'Conhecimento em movimento',

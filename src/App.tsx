@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router';
 
 import { LoadingState } from '@/components/LoadingState';
+import { RouteStatus } from '@/components/RouteStatus';
 import { useSession } from '@/contexts/SessionContext';
 import { AppLayout } from '@/layouts/AppLayout';
 import { FeedPage } from '@/pages/FeedPage';
@@ -26,6 +27,28 @@ function WaitForSession() {
   const { t } = useTranslation();
   const { status } = useSession();
   return status === 'initializing' ? <LoadingState label={t('loadingSession')} /> : <Outlet />;
+}
+
+const DraftListPage = lazy(() =>
+  import('@/pages/DraftListPage').then((module) => ({ default: module.DraftListPage })),
+);
+const DraftEditorPage = lazy(() =>
+  import('@/pages/DraftEditorPage').then((module) => ({ default: module.DraftEditorPage })),
+);
+
+function DraftRoute() {
+  const { t } = useTranslation();
+  const { user, profileStatus, editorAccess } = useSession();
+  const location = useLocation();
+  const state = { from: location };
+  if (!user) return <Navigate to="/login" replace state={state} />;
+  if (profileStatus === 'loading' || profileStatus === 'none' || editorAccess === 'checking')
+    return <LoadingState label={t('checkingProfile')} />;
+  if (profileStatus === 'not-found') return <Navigate to="/register" replace state={state} />;
+  if (profileStatus !== 'ready') return <SessionProblemPage />;
+  if (editorAccess !== 'allowed')
+    return <RouteStatus title={t('draftAccessDenied')} message={t('draftAccessDeniedMessage')} />;
+  return <Outlet />;
 }
 
 function AuthPage({ mode }: { mode: 'login' | 'register' }) {
@@ -59,6 +82,11 @@ export default function App() {
             <Route path="/login" element={<AuthPage mode="login" />} />
             <Route path="/register" element={<AuthPage mode="register" />} />
             <Route path="/session" element={<SessionProblemPage />} />
+            <Route element={<DraftRoute />}>
+              <Route path="/drafts" element={<DraftListPage />} />
+              <Route path="/drafts/new" element={<DraftEditorPage />} />
+              <Route path="/drafts/:id/edit" element={<DraftEditorPage />} />
+            </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
