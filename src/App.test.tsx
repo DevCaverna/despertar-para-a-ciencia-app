@@ -25,6 +25,7 @@ const guest: ReturnType<typeof useSession> = {
   profile: null,
   status: 'unauthenticated',
   profileStatus: 'none',
+  editorAccess: 'denied',
   profileError: null,
   loadProfile: vi.fn().mockResolvedValue(null),
   logout: vi.fn().mockResolvedValue(undefined),

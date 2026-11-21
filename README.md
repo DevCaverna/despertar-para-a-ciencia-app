@@ -48,6 +48,9 @@ Sem `VITE_FIREBASE_AUTH_EMULATOR_URL`, o SDK utiliza o serviço Firebase configu
 - Feed público em `/`, com paginação em `/?page=2`. A consulta `GET /posts?page=1&perPage=20` não envia token e retorna `{ items, page, perPage, hasNextPage }`. Cada item contém `id`, `title`, `publishedAt` (ISO 8601) e `author` (`{ id, name }` ou `null`). A ordem da API é preservada.
 - Leitura pública em `/posts/:id`. `GET /posts/:id` recebe um UUIDv7 e retorna os mesmos campos públicos do feed mais `content` (texto simples). A API não retorna posts não publicados. Os links do feed preservam a página de origem para o retorno, sem alterar a URL da publicação.
 - Página de boas-vindas autenticada em `/dashboard`, provisória e sem autorização por papel no frontend.
+- Área `/drafts` para colaboradores e administradores com perfil ativo. Permite criar, listar e editar os próprios rascunhos. A listagem usa `GET /posts/drafts?page=1&perPage=20`, o editor consulta `GET /posts/drafts/:id`, e os salvamentos usam `POST /posts` e `PATCH /posts/:id`.
+
+Para conferir rascunhos no ambiente local descrito acima, entre com uma conta de teste com papel COLLABORATOR ou ADMIN. Crie um rascunho, reabra pelo link da lista, edite e recarregue para conferir a persistência. Com mais de 20 rascunhos, verifique a navegação entre páginas.
 
 Os endpoints e corpos seguem a documentação atual da API (`POST /users/send-email-verification-code`, `POST/GET/PATCH /users/profile`). Claims de perfil são atualizadas pela API; após o cadastro, o Firebase ID Token é renovado antes de novas requisições autenticadas.
 

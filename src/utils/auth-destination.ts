@@ -6,7 +6,9 @@ export function getAuthDestination(state: unknown): To {
   if (typeof from?.pathname !== 'string') return '/';
   // Only return to implemented destinations outside the auth flow.
   const pathname = from.pathname.replace(/\/+$/, '').toLowerCase() || '/';
-  if (pathname !== '/' && pathname !== '/dashboard') return '/';
+  const isDraftEditor = /^\/drafts\/[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}\/edit$/.test(pathname);
+  if (!['/', '/dashboard', '/drafts', '/drafts/new'].includes(pathname) && !isDraftEditor)
+    return '/';
   return {
     pathname,
     search: typeof from.search === 'string' && from.search.startsWith('?') ? from.search : '',

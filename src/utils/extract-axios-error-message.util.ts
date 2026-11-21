@@ -35,11 +35,7 @@ function extractValidationMessages(errors: ValidationError[], messages: string[]
   return messages;
 }
 
-export function extractAxiosErrorMessage(error: unknown): string {
-  if (error && typeof error === 'object' && 'code' in error && typeof error.code === 'string') {
-    return t(firebaseMessages[error.code] ?? 'authGenericError');
-  }
-
+export function extractAxiosErrorMessage(error: unknown, context?: 'draft'): string {
   if (axios.isAxiosError<ApiErrorResponse>(error)) {
     const data = error.response?.data;
     if (typeof data?.message === 'string') return data.message;
@@ -54,15 +50,15 @@ export function extractAxiosErrorMessage(error: unknown): string {
 
     switch (error.response?.status) {
       case 400:
-        return t('errorInvalidCode');
+        return t(context === 'draft' ? 'errorDraftInvalid' : 'errorInvalidCode');
       case 401:
         return t('errorUnauthorized');
       case 403:
         return t('errorForbidden');
       case 404:
-        return t('errorProfileNotFound');
+        return t(context === 'draft' ? 'errorDraftNotFound' : 'errorProfileNotFound');
       case 409:
-        return t('errorConflict');
+        return t(context === 'draft' ? 'errorDraftConflict' : 'errorConflict');
       case 429:
         return t('errorRateLimited');
       default:
@@ -70,6 +66,10 @@ export function extractAxiosErrorMessage(error: unknown): string {
           ? t('errorUnavailable')
           : error.message || t('errorUnexpected');
     }
+  }
+
+  if (error && typeof error === 'object' && 'code' in error && typeof error.code === 'string') {
+    return t(firebaseMessages[error.code] ?? 'authGenericError');
   }
 
   if (error instanceof Error) {

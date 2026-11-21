@@ -1,4 +1,11 @@
 export const actions = {
+  createDraft: 'Criar rascunho',
+  editDraft: 'Editar rascunho',
+  saveDraft: 'Salvar rascunho',
+  savingDraft: 'Salvando…',
+  backToDrafts: 'Voltar aos rascunhos',
+  loadingDrafts: 'Carregando rascunhos…',
+  loadingDraft: 'Carregando rascunho…',
   home: 'Início',
   logout: 'Sair',
   loggingOut: 'Saindo…',
