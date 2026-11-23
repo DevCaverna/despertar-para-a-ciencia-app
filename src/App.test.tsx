@@ -8,7 +8,9 @@ import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } fr
 import App from '@/App';
 import { useSession } from '@/contexts/SessionContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import type { AcademicWork, AcademicWorkPage } from '@/models/academic-work.model';
 import type { PublishedPostDetail, PublishedPostPage } from '@/models/post.model';
+import { AcademicWorkService } from '@/services/academic-work.service';
 import { completeProfile, createFirebaseAccount, loginWithPassword } from '@/services/auth.service';
 import { PostService } from '@/services/post.service';
 import { UserService } from '@/services/user.service';
@@ -23,6 +25,7 @@ vi.mock('@/services/auth.service', () => ({
 const guest: ReturnType<typeof useSession> = {
   user: null,
   profile: null,
+  editorAccess: 'denied',
   status: 'unauthenticated',
   profileStatus: 'none',
   profileError: null,
@@ -40,6 +43,17 @@ const detail: PublishedPostDetail = {
   author: null,
   publishedAt: '2026-11-18T12:00:00.000Z',
   content: 'Conteúdo completo.',
+};
+const academicWork: AcademicWork = {
+  id: '019abcde-f000-7000-8000-000000000003',
+  doi: '10.1234/example',
+  title: 'A scientific article',
+  authors: ['Ada Lovelace'],
+  abstract: 'A study about science.',
+  publicationDate: '2025-06',
+  journal: null,
+  url: 'https://example.com/article',
+  source: { id: '019abcde-f000-7000-8000-000000000004', name: 'Science Journal', issn: '12345678' },
 };
 
 function CurrentURL() {
@@ -86,6 +100,81 @@ describe('rotas públicas e sessão', () => {
   });
 
   afterEach(cleanup);
+
+  it('permite ao colaborador consultar e selecionar um trabalho importado', async () => {
+    vi.mocked(useSession).mockReturnValue({
+      ...guest,
+      user,
+      status: 'authenticated',
+      profileStatus: 'ready',
+      editorAccess: 'allowed',
+    });
+    vi.spyOn(AcademicWorkService.prototype, 'list').mockResolvedValue({
+      data: { items: [academicWork], page: 1, perPage: 20, hasNextPage: false },
+    } as AxiosResponse<AcademicWorkPage>);
+    vi.spyOn(AcademicWorkService.prototype, 'get').mockResolvedValue({
+      data: academicWork,
+    } as AxiosResponse<AcademicWork>);
+    renderApp('/academic-works');
+    expect(
+      await screen.findByRole('heading', { name: academicWork.title }, { timeout: 5000 }),
+    ).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Trabalhos' })).toHaveAttribute('aria-current', 'page');
+    await userEvent.click(screen.getByRole('link', { name: /A scientific article/ }));
+    expect(
+      await screen.findByRole('heading', { level: 1, name: academicWork.title }, { timeout: 5000 }),
+    ).toBeVisible();
+    expect(screen.getByText(academicWork.abstract!)).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Selecionar trabalho' })).toHaveAttribute(
+      'href',
+      `/academic-works/${academicWork.id}/generate`,
+    );
+    await userEvent.click(screen.getByRole('link', { name: 'Selecionar trabalho' }));
+    expect(
+      await screen.findByRole('heading', { name: 'Trabalho selecionado' }, { timeout: 5000 }),
+    ).toBeVisible();
+    expect(screen.getByLabelText('URL')).toHaveTextContent(
+      `/academic-works/${academicWork.id}/generate`,
+    );
+  });
+
+  it('restringe a consulta a perfis editoriais', async () => {
+    vi.mocked(useSession).mockReturnValue({
+      ...guest,
+      user,
+      status: 'authenticated',
+      profileStatus: 'ready',
+      editorAccess: 'denied',
+    });
+    const list = vi.spyOn(AcademicWorkService.prototype, 'list');
+    renderApp('/academic-works');
+    expect(await screen.findByRole('heading', { name: 'Acesso restrito' })).toBeVisible();
+    expect(list).not.toHaveBeenCalled();
+  });
+
+  it('retoma a consulta de trabalhos após o login de um colaborador', async () => {
+    vi.spyOn(AcademicWorkService.prototype, 'list').mockResolvedValue({
+      data: { items: [academicWork], page: 1, perPage: 20, hasNextPage: false },
+    } as AxiosResponse<AcademicWorkPage>);
+    vi.mocked(loginWithPassword).mockImplementation(async () => {
+      vi.mocked(useSession).mockReturnValue({
+        ...guest,
+        user,
+        status: 'authenticated',
+        profileStatus: 'ready',
+        editorAccess: 'allowed',
+      });
+      return { user } as UserCredential;
+    });
+    renderApp('/academic-works?page=2');
+    fireEvent.change(await screen.findByLabelText('E-mail'), { target: { value: user.email } });
+    fireEvent.change(screen.getByLabelText('Senha'), { target: { value: 'password' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
+    expect(
+      await screen.findByRole('heading', { name: 'Trabalhos acadêmicos' }, { timeout: 5000 }),
+    ).toBeVisible();
+    expect(screen.getByLabelText('URL')).toHaveTextContent('/academic-works?page=2');
+  });
 
   it('mostra o feed e os controles de visitante sem exigir login', async () => {
     renderApp();

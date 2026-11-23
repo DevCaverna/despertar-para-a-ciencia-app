@@ -9,7 +9,7 @@ import { i18n } from '@/locales';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
-  const { user, profile, status, logout } = useSession();
+  const { user, profile, editorAccess, status, logout } = useSession();
   const navigate = useNavigate();
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState('');
@@ -57,6 +57,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 to="/dashboard"
               >
                 {t('dashboard')}
+              </NavLink>
+            )}
+            {user && editorAccess === 'allowed' && (
+              <NavLink
+                className="inline-flex min-h-9 items-center text-sm text-ink-secondary hover:text-ink hover:no-underline aria-[current=page]:font-semibold aria-[current=page]:text-ink max-[720px]:text-xs"
+                to="/academic-works"
+              >
+                {t('academicWorksNav')}
               </NavLink>
             )}
           </nav>

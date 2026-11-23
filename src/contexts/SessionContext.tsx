@@ -17,10 +17,12 @@ import { UserService } from '@/services/user.service';
 
 export type ProfileStatus = 'loading' | 'ready' | 'not-found' | 'inactive' | 'error' | 'none';
 export type SessionStatus = 'initializing' | 'authenticated' | 'unauthenticated';
+export type EditorAccess = 'checking' | 'allowed' | 'denied';
 
 interface SessionContextValue {
   user: FirebaseUser | null;
   profile: UserProfile | null;
+  editorAccess: EditorAccess;
   status: SessionStatus;
   profileStatus: ProfileStatus;
   profileError: unknown;
@@ -38,6 +40,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     firebaseConfigurationAvailable ? 'initializing' : 'unauthenticated',
   );
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [editorAccess, setEditorAccess] = useState<EditorAccess>('denied');
   const [profileStatus, setProfileStatus] = useState<ProfileStatus>('none');
   const [profileError, setProfileError] = useState<unknown>(null);
   const profileRequestId = useRef(0);
@@ -47,15 +50,27 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     const uid = auth?.currentUser?.uid;
     setProfileStatus('loading');
     setProfileError(null);
+    setEditorAccess('checking');
     try {
+      const token = await auth?.currentUser?.getIdTokenResult(true);
+      if (!token) throw new Error('Unable to load Firebase claims.');
       const { data: current } = await userService.getProfile();
       if (requestId !== profileRequestId.current || uid !== auth?.currentUser?.uid) return null;
+      const claimedRoles = token.claims.roles;
+      setEditorAccess(
+        current.active &&
+          Array.isArray(claimedRoles) &&
+          claimedRoles.some((role) => role === 'COLLABORATOR' || role === 'ADMIN')
+          ? 'allowed'
+          : 'denied',
+      );
       setProfile(current);
       setProfileStatus(current.active ? 'ready' : 'inactive');
       return current;
     } catch (error) {
       if (requestId !== profileRequestId.current || uid !== auth?.currentUser?.uid) return null;
       setProfile(null);
+      setEditorAccess('denied');
       setProfileError(error);
       if ((error as { response?: { status?: number } }).response?.status === 404)
         setProfileStatus('not-found');
@@ -74,6 +89,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       profileRequestId.current += 1;
       setUser(firebaseUser);
       setProfile(null);
+      setEditorAccess(firebaseUser ? 'checking' : 'denied');
       setProfileError(null);
       if (firebaseUser) {
         setStatus('authenticated');
@@ -90,14 +106,24 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     if (auth) await signOut(auth);
     setUser(null);
     setProfile(null);
+    setEditorAccess('denied');
     setProfileError(null);
     setProfileStatus('none');
     setStatus('unauthenticated');
   }, []);
 
   const value = useMemo(
-    () => ({ user, profile, status, profileStatus, profileError, loadProfile, logout }),
-    [user, profile, status, profileStatus, profileError, loadProfile, logout],
+    () => ({
+      user,
+      profile,
+      editorAccess,
+      status,
+      profileStatus,
+      profileError,
+      loadProfile,
+      logout,
+    }),
+    [user, profile, editorAccess, status, profileStatus, profileError, loadProfile, logout],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
