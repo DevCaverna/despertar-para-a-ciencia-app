@@ -3,11 +3,26 @@ import { useTranslation } from 'react-i18next';
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router';
 
 import { LoadingState } from '@/components/LoadingState';
+import { RouteStatus } from '@/components/RouteStatus';
 import { useSession } from '@/contexts/SessionContext';
 import { AppLayout } from '@/layouts/AppLayout';
 import { FeedPage } from '@/pages/FeedPage';
 import { PostDetailPage } from '@/pages/PostDetailPage';
 import { getAuthDestination } from '@/utils/auth-destination';
+
+const AcademicWorksPage = lazy(() =>
+  import('@/pages/AcademicWorksPage').then((module) => ({ default: module.AcademicWorksPage })),
+);
+const AcademicWorkDetailPage = lazy(() =>
+  import('@/pages/AcademicWorkDetailPage').then((module) => ({
+    default: module.AcademicWorkDetailPage,
+  })),
+);
+const AcademicWorkGenerationPage = lazy(() =>
+  import('@/pages/AcademicWorkGenerationPage').then((module) => ({
+    default: module.AcademicWorkGenerationPage,
+  })),
+);
 
 const DashboardPage = lazy(() =>
   import('@/pages/DashboardPage').then((module) => ({ default: module.DashboardPage })),
@@ -47,6 +62,26 @@ function AuthPage({ mode }: { mode: 'login' | 'register' }) {
   return mode === 'login' ? <LoginPage /> : <RegisterPage />;
 }
 
+function EditorRoute() {
+  const { user, profileStatus, editorAccess } = useSession();
+  const { t } = useTranslation();
+  const location = useLocation();
+  if (!user) return <Navigate to="/login" replace state={{ from: location }} />;
+  if (profileStatus === 'loading' || profileStatus === 'none' || editorAccess === 'checking')
+    return <LoadingState label={t('checkingProfile')} />;
+  if (profileStatus === 'not-found')
+    return <Navigate to="/register" replace state={{ from: location }} />;
+  if (profileStatus !== 'ready') return <SessionProblemPage />;
+  if (editorAccess !== 'allowed')
+    return (
+      <RouteStatus
+        title={t('academicWorkAccessDenied')}
+        message={t('academicWorkAccessDeniedMessage')}
+      />
+    );
+  return <Outlet />;
+}
+
 export default function App() {
   return (
     <AppLayout>
@@ -55,6 +90,11 @@ export default function App() {
           <Route path="/" element={<FeedPage />} />
           <Route path="/posts/:id" element={<PostDetailPage />} />
           <Route element={<WaitForSession />}>
+            <Route element={<EditorRoute />}>
+              <Route path="/academic-works" element={<AcademicWorksPage />} />
+              <Route path="/academic-works/:id" element={<AcademicWorkDetailPage />} />
+              <Route path="/academic-works/:id/generate" element={<AcademicWorkGenerationPage />} />
+            </Route>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/login" element={<AuthPage mode="login" />} />
             <Route path="/register" element={<AuthPage mode="register" />} />
